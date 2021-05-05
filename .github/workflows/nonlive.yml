@@ -1,0 +1,30 @@
+name: Nonlive Deploy
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_PARTITION: ${{ secrets.NONLIVE_AWS_PARTITION }}
+  AWS_ACCOUNT_ID: ${{ secrets.NONLIVE_AWS_ACCOUNT_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.NONLIVE_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.NONLIVE_AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.NONLIVE_AWS_DEFAULT_REGION }}
+  BUCKET_NAME: ${{ secrets.NONLIVE_AWS_BUCKET_NAME }}
+  CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.NONLIVE_AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+  NODE_ENV: nonlive
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'Initial commit') && !startsWith(github.event.head_commit.message, '[Scaffoldly]')"
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          export version=$(jq -r .version sly.json)
+          npx gomplate -f index.html > index.html
+        working-directory: public_html
+        # TODO Bump version
+      - run: aws s3 sync . "s3://$BUCKET_NAME"
+        working-directory: public_html
+      - run: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
