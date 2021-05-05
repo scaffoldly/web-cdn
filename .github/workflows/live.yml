@@ -13,14 +13,12 @@ env:
   AWS_DEFAULT_REGION: ${{ secrets.NONLIVE_AWS_DEFAULT_REGION }}
   BUCKET_NAME: ${{ secrets.NONLIVE_AWS_BUCKET_NAME }}
   CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.NONLIVE_AWS_CLOUDFRONT_DISTRIBUTION_ID }}
-  NODE_ENV: nonlive
+  NODE_ENV: live
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: "!startsWith(github.event.head_commit.message, 'Initial commit') && !startsWith(github.event.head_commit.message, '[Scaffoldly]')"
     steps:
       - uses: actions/checkout@v2
-      # TODO Bump version
       - run: |
           cp sly.json public_html/version.json
       - run: aws s3 sync . "s3://$BUCKET_NAME"
