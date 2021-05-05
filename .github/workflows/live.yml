@@ -1,9 +1,7 @@
-name: Nonlive Deploy
+name: Live Deploy
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   AWS_PARTITION: ${{ secrets.NONLIVE_AWS_PARTITION }}
@@ -19,6 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: scaffoldly/bump-version-action@main
+        with:
+          action: postrelease
+          version-file: sly.json
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cp sly.json public_html/version.json
       - run: aws s3 sync . "s3://$BUCKET_NAME"

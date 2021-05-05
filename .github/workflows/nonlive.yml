@@ -20,7 +20,11 @@ jobs:
     if: "!startsWith(github.event.head_commit.message, 'Initial commit') && !startsWith(github.event.head_commit.message, '[Scaffoldly]')"
     steps:
       - uses: actions/checkout@v2
-      # TODO Bump version
+      - uses: scaffoldly/bump-version-action@main
+        with:
+          action: prerelease
+          version-file: sly.json
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cp sly.json public_html/version.json
       - run: aws s3 sync . "s3://$BUCKET_NAME"
