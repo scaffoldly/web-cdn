@@ -20,7 +20,7 @@ jobs:
     if: "!startsWith(github.event.head_commit.message, 'Initial commit') && !startsWith(github.event.head_commit.message, '[Scaffoldly]')"
     steps:
       - uses: actions/checkout@v2
-      - uses: scaffoldly/bump-version-action@main
+      - uses: scaffoldly/bump-version-action@1.0.87
         with:
           action: prerelease
           version-file: sly.json
